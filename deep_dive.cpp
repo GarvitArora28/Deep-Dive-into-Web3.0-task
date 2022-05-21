@@ -52,6 +52,25 @@ class LoaningSystem{    // Class for LoaningSystem
         this->transactions = new double[1000];
         this->numberOfTransactions = 0;
     }
+    
+    // Copy constructor
+    LoaningSystem(LoaningSystem &other){
+        this->aadharNumber = other.aadharNumber;     
+        this->startingMonth = other.startingMonth;
+        this->startingYear = other.startingYear;
+        this->time = other.time;
+        this->principal = other.principal;
+        this->transactions = new double[120];  
+        this->numberOfTransactions =other.numberOfTransactions;
+        this->interest = other.interest;
+        this->borrowerID = other.borrowerID;
+        this->lenderID = other.lenderID;
+        this->loanID = other.loanID;
+        for(int i  = 0; i < numberOfTransactions; i++){
+            transactions[i] = other.transactions[i];
+        }
+    }
+
 
     // Operator overloading to check which lender has more money
     // or which borrower has borrowed more money
@@ -324,6 +343,7 @@ int main(){
 
     StudentLoan s1("Divya",48, "MBBS", 103, 2, 2022, 60, 10000, 5, 3, 1, 3);
     StudentLoan s2("Garvit",372, "B. Tech", 104, 3, 2022, 30, 10000, 7.5, 4, 3, 4);
+    StudentLoan s3(s1);
 
     if(s1==s2){
         cout<<"Student 1 and 2 have taken the same amount of loan!\n";
@@ -334,6 +354,9 @@ int main(){
     cout<<endl;
     cout<<"Student 2 details are: \n";
     s2.loanDetails();
+    cout<<endl;
+    cout<<"Student 3 details are: \n";
+    s3.loanDetails();
     cout<<endl;
 
     return 0;
