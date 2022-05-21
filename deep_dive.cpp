@@ -141,6 +141,10 @@ class LoaningSystem{    // Class for LoaningSystem
         transactions[numberOfTransactions-1] = amount;
     }
 
+    ~LoaningSystem(){
+        delete[] transactions;
+    }
+
 };
 
 
@@ -217,6 +221,11 @@ class HomeLoan: public LoaningSystem{
         cout<<"Amount left to be paid: "<<remainingAmount()<<endl;
         timeRemaining(currentMonth, currentYear);
     }
+    
+    ~HomeLoan(){
+        delete[] transactions;
+    }
+
 };
 
 class StudentLoan: public LoaningSystem{
@@ -283,6 +292,11 @@ class StudentLoan: public LoaningSystem{
         cout<<"Installment amount is: "<<this->installments()<<endl;
         cout<<"Amount left to be paid: "<<remainingAmount()<<endl;
     }
+    
+    ~StudentLoan(){
+        delete[] transactions;
+    }
+
 };
 
 int main(){
