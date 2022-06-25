@@ -84,15 +84,25 @@ contract Loan is MetaCoin {
     function reqLoan(uint256 principle, uint rate, uint time) public returns(bool correct) {
         uint256 toPay = getCompoundInterest(principle, rate, time);
         loans[msg.sender] = toPay;
+
+        if(rate%1 != 0 || toPay>principle) return false;
+        emit Request(msg.sender, principle, rate, time, toPay);
+        return true;
         // A creditor uses this function to request the Owner to settle his loan, and the amount to settle is calculated using the inputs.
         // Add appropriate definition below to store the loan request of a contract in the loans mapping,
         // Also emit the Request event after succesfully adding to the mapping, and return true. Return false if adding to the mapping failed (maybe the user entered a float rate, there were overflows and toPay comes to be lesser than principle, etc.
     }
     
     function getOwnerBalance() public view returns(uint256) {
-				// use the getBalance function of MetaCoin contract to view the Balance of the contract Owner.
-				// hint: how do you access the functions / variables of the parent class in your favorite programming language? It is similar to that in solidity as well!
-		}
+        uint256 balance = MetaCoin(msg.sender).getBalance(Owner);
+        return balance;
+		// use the getBalance function of MetaCoin contract to view the Balance of the contract Owner.
+		// hint: how do you access the functions / variables of the parent class in your favorite programming language? It is similar to that in solidity as well!
+	}
+
+    function viewDues(address creditor) public isOwner view returns(uint256) {
+
+    }
     
     // implement viewDues and settleDues which allow *ONLY* the owner to *view* and *settle* his loans respectively. They take in the address of a creditor as arguments. viewDues returns a uint256 corresponding to the due amount, and does not modify any state variables. settleDues returns a bool, true if the dues were settled and false otherwise. Remember to set the the pending loan to 0 after settling the dues.
     // use sendCoin function of MetaCoin contract to send the coins required for settling the dues.
