@@ -41,10 +41,11 @@ contract Loan is MetaCoin {
 
     
     modifier isOwner() {
-        require(Owner==msg.sender, "Only owner can call the function.");
+        require(Owner == msg.sender, "Only owner can call the function.");
         _;
         // Implement a modifier to allow only the owner of the contract to use specific functions
     }
+
     
     constructor() public {
         Owner = msg.sender;
@@ -54,23 +55,40 @@ contract Loan is MetaCoin {
     
     // Fill up the following function definitions and also try to justify why some functions are pure and some are view and some are none, in your README.md
     
-    function mulDiv (uint x, uint y, uint z) public pure returns (uint){
-        return x * y / z;
+
+    function mulDiv (
+        uint x, 
+        uint y, 
+        uint z
+    )
+    public pure returns (uint)
+    {
+        uint a = x / z; 
+        uint b = x % z; // x = a * z + b
+        uint c = y / z; 
+        uint d = y % z; // y = c * z + d
+        return a * b * z + a * d + b * c + b * d / z;
     }
 
 
-    function getCompoundInterest(uint256 principle, uint rate, uint time) public pure returns(uint256) {
+    function getCompoundInterest(
+        uint256 principle, 
+        uint rate, 
+        uint time
+    ) 
+    public pure returns(
+        uint256
+    ) 
+    {
         uint256 P = principle;
         uint256 R = rate;
         uint256 T = time;
-        uint256 interest = 0;
         
         for(uint i = 0; i<T; i++){
-            interest += mulDiv(R, P, 100);
             P +=  mulDiv(R, P, 100);
         }
 
-        return interest;
+        return P;
         
     	// Anyone should be able to use this function to calculate the amount of Compound interest for given P, R, T
         // Solidity does not have a good support for fixed point numbers so we input the rate as a uint
@@ -81,11 +99,19 @@ contract Loan is MetaCoin {
         
     }
     
-    function reqLoan(uint256 principle, uint rate, uint time) public returns(bool correct) {
-        uint256 toPay = getCompoundInterest(principle, rate, time);
-        loans[msg.sender] = toPay;
 
-        if(rate%1 != 0 || toPay>principle) return false;
+    function reqLoan(
+        uint256 principle,
+        uint256 rate, 
+        uint time
+    ) 
+    public returns(
+        bool
+    ) 
+    {
+        uint256 toPay = getCompoundInterest(principle, rate, time);
+        if(rate%1 != 0 || toPay<principle) return false;
+        loans[msg.sender] = toPay;
         emit Request(msg.sender, principle, rate, time, toPay);
         return true;
         // A creditor uses this function to request the Owner to settle his loan, and the amount to settle is calculated using the inputs.
@@ -93,15 +119,36 @@ contract Loan is MetaCoin {
         // Also emit the Request event after succesfully adding to the mapping, and return true. Return false if adding to the mapping failed (maybe the user entered a float rate, there were overflows and toPay comes to be lesser than principle, etc.
     }
     
+
     function getOwnerBalance() public view returns(uint256) {
-        uint256 balance = MetaCoin(msg.sender).getBalance(Owner);
+        uint256 balance = MetaCoin.getBalance(Owner);
         return balance;
 		// use the getBalance function of MetaCoin contract to view the Balance of the contract Owner.
 		// hint: how do you access the functions / variables of the parent class in your favorite programming language? It is similar to that in solidity as well!
 	}
 
-    function viewDues(address creditor) public isOwner view returns(uint256) {
 
+    function viewDues(
+        address creditor
+    ) 
+    public isOwner view returns(
+        uint256 dueAmount
+    ) 
+    {
+        dueAmount = loans[creditor];
+    }
+
+
+    function settleDues(
+        address creditor
+    )
+    public isOwner returns(
+        bool isSettled
+    )
+    {
+        bool sent = sendCoin(creditor, loans[creditor], Owner);
+        if(sent) loans[creditor] = 0;
+        return sent;
     }
     
     // implement viewDues and settleDues which allow *ONLY* the owner to *view* and *settle* his loans respectively. They take in the address of a creditor as arguments. viewDues returns a uint256 corresponding to the due amount, and does not modify any state variables. settleDues returns a bool, true if the dues were settled and false otherwise. Remember to set the the pending loan to 0 after settling the dues.
