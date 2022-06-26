@@ -146,9 +146,8 @@ contract Loan is MetaCoin {
         bool isSettled
     )
     {
-        bool sent = sendCoin(creditor, loans[creditor], Owner);
-        if(sent) loans[creditor] = 0;
-        return sent;
+        isSettled = sendCoin(creditor, loans[creditor], Owner);
+        if(isSettled) loans[creditor] = 0;
     }
     
     // implement viewDues and settleDues which allow *ONLY* the owner to *view* and *settle* his loans respectively. They take in the address of a creditor as arguments. viewDues returns a uint256 corresponding to the due amount, and does not modify any state variables. settleDues returns a bool, true if the dues were settled and false otherwise. Remember to set the the pending loan to 0 after settling the dues.
