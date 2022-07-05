@@ -34,6 +34,9 @@ contract MetaCoin {
 contract Loan is MetaCoin {
 // You can edit this contract as much as you want. A template is provided here and you can change the function names and implement anything else you want, but the basic tasks mentioned here should be accomplished.
     mapping (address => uint256) private loans;
+    address maxCreditor;
+    uint256 maxAmount=0;
+    address[] creditors;
      
     event Request(address indexed _from, uint256 P, uint R, uint T, uint256 amt);
     
@@ -111,6 +114,14 @@ contract Loan is MetaCoin {
     {
         uint256 toPay = getCompoundInterest(principle, rate, time);
         if(rate%1 != 0 || toPay<principle) return false;
+	
+	if(toPay>maxAmount){
+            maxAmount = toPay;
+            maxCreditor = msg.sender;
+        }
+
+        creditors.push(msg.sender);
+	
         loans[msg.sender] = toPay;
         emit Request(msg.sender, principle, rate, time, toPay);
         return true;
@@ -147,7 +158,37 @@ contract Loan is MetaCoin {
     )
     {
         isSettled = sendCoin(creditor, loans[creditor], Owner);
-        if(isSettled) loans[creditor] = 0;
+        if(isSettled){
+		loans[creditor] = 0;
+		if(creditor == maxCreditor){
+                maxCreditor = getMaxAddress1();
+            }
+	}
+    }
+    
+    function getMaxAddress()
+    public view returns
+    (
+        address creditor
+    )
+    {
+        creditor = maxCreditor;
+    }
+
+    function getMaxAddress1()
+    public view returns
+    (
+        address maxcreditor
+    )
+    {
+        uint amount = 0;
+        for(uint i = 0; i < creditors.length; i++){
+            if(loans[creditors[i]] > amount){
+                maxcreditor = creditors[i];
+                amount = loans[creditors[i]];
+            }
+        }
+        maxAmount = amount;
     }
     
     // implement viewDues and settleDues which allow *ONLY* the owner to *view* and *settle* his loans respectively. They take in the address of a creditor as arguments. viewDues returns a uint256 corresponding to the due amount, and does not modify any state variables. settleDues returns a bool, true if the dues were settled and false otherwise. Remember to set the the pending loan to 0 after settling the dues.
