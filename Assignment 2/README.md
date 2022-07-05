@@ -35,4 +35,11 @@
 * To test the code just compile it in remix and deploy it. The current address would be owner.
 * Change the address to act like a creditor and call all the function with appropriate parameters, they would work.
 
-#### Thank you!
+### getMaxAddress() or getMaxAddress1():
+* getMaxAddress() and getMaxAddress1() functions have been implemented to get the address of the creditor to which the owner owes the most.
+* getMaxAddress() uses less gas than getMaxAddress1() function because getMaxAddress() function just has to return a single already stored value whereas getMaxAddress1() has to loop through the loans mapping to get the value each time it is called.
+* settleDues() has also been updated to check if the maxCreditor has been settled or not. If he has been settled the new maxCreditor and maxAmount is found by looping through the loans array by calling getMaxAddress1() function.
+
+
+## <p align="right">Thank you!</p>
+<p align = "right"> Garvit Arora </p>
